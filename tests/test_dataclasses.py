@@ -5,7 +5,7 @@ from typing import List, Dict, Tuple
 
 sys.path.append("..")
 
-from slp_dataclasses.common import BinData, U8Data, U16Data, U32Data, S8Data, S16Data, S32Data, F32Data, U8BitFlagData, StringData
+from slp_dataclasses.common import BinData, U8Data, U16Data, U32Data, S8Data, S16Data, S32Data, F32Data, U8BitFlagData, StringData, ArrayData, ShiftJISStringData
 
 #TODO: Write a function to test read/write values, the copy-pasting is getting out of hand
 # test_tuples is a list of tuples of form (input_b_string, expected_value)
@@ -261,5 +261,113 @@ def test_S32_version():
     out = stream.read()
     assert int.from_bytes(out,"big") == 4294967295
 
+def test_U8BitFlagData():
+    # 10101010
+    stream = io.BytesIO(b'\xAA')
+
+    u8bflag = U8BitFlagData()
+
+    u8bflag.read(stream, '10000.0.0')
+
+    assert u8bflag.val == [True, False, True, False, True, False, True, False]
+
+    u8bflag.val = [False, True, False, True, False, True, False, True]
+
+    stream.seek(0)
+    u8bflag.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    # 01010101
+    assert int.from_bytes(out,"big") == 85
+
+def test_ArrayData():
+    stream = io.BytesIO(b'\xFF\xFF\xFF\xFF')
+    ad = ArrayData(val=[0,0,0,0],len=4)
+    ad.read(stream, '10000.0.0')
+    assert ad.val == [255,255,255,255]
+
+    ad.val = [255,0,255,0]
+    stream.seek(0)
+    ad.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    # FF 00 FF 00
+    assert int.from_bytes(out,"big") == 4278255360
+
+# Test behaviour when the length of the array is mismatched from the len attribute
+def test_ArrayData_mismatched():
+    stream = io.BytesIO(b'\xFF\xFF\xFF\xFF')
+    ad = ArrayData(val=[0,0,0,0],len=2)
+    ad.read(stream, '10000.0.0')
+    assert ad.val == [255,255]
+
+    ad = ArrayData(val=[0,0,0,0],len=6)
+    ad.val = [255,0,255,0]
+
+    stream.seek(0)
+    ad.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    # FF 00 FF 00 00 00
+    assert int.from_bytes(out,"big") == 280379743272960
+
+    ad = ArrayData(val=[],len=6)
+    ad.val = []
+
+    stream.seek(0)
+    ad.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    # FF 00 FF 00 00 00
+    assert int.from_bytes(out,"big") == 0
+
+def test_StringData():
+    # ABCD
+    stream = io.BytesIO(b'\x41\x42\x43\x44')
+    ad = StringData(val='hello',len=4)
+    ad.read(stream, '10000.0.0')
+    assert ad.val == 'ABCD'
+
+    ad = StringData(val='a',len=5)
+    ad.val = 'hello'
+    stream.seek(0)
+    ad.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    # h e l l o
+    assert int.from_bytes(out,"big") == 448378203247
+
+    stream = io.BytesIO(b'\x00')
+    ad = StringData(val='a',len=5)
+    ad.val = ''
+    stream.seek(0)
+    ad.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    assert out == b'\x00\x00\x00\x00\x00'
+
+def test_ShiftJISStringData():
+    stream = io.BytesIO(b'\xDE\xAD\xBE\xEF\xFF\xFF')
+    sjis = ShiftJISStringData(val=[0,0],len=3)
+    sjis.read(stream, '10000.0.0')
+    assert sjis.val == [57005, 48879, 65535]
+
+    # 0xBAADF00D
+    sjis.val = [47789, 61453]
+
+    stream.seek(0)
+    sjis.write(stream, '10000.0.0')
+    stream.seek(0)
+
+    out = stream.read()
+    assert out == b'\xBA\xAD\xF0\x0D\x00\x00'
+
+
 if __name__ == "__main__":
-    test_S32()
+    test_ShiftJISStringData()
