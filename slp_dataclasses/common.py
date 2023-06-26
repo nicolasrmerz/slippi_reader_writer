@@ -8,8 +8,6 @@ class BinData:
     val: Union[float, int, str]
     data_type: type = int
     format_char: str = '>B'
-    offset: int = 0
-    length: int = 0
     version: str = '0.1.0'
 
     def compare_version(self, given_ver):

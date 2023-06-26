@@ -1,0 +1,252 @@
+{
+    "command_byte": {"val": 54, "version": "0.1.0"},
+    "version":
+    {
+        "major": {"val": 3, "version": "0.1.0"},
+        "minor": {"val": 14, "version": "0.1.0"},
+        "build": {"val": 0, "version": "0.1.0"},
+        "unused": {"val": 0, "version": "0.1.0"}
+    },
+    "game_info_block":
+    {
+        "game_bitfield_1": {"val": [false, false, true, true, false, false, true, false], "version": "0.1.0"},
+        "game_bitfield_2": {"val": [false, false, false, false, false, false, false, true], "version": "0.1.0"},
+        "game_bitfield_3": {"val": [true, false, false, false, true, true, true, false], "version": "0.1.0"},
+        "game_bitfield_4": {"val": [false, true, false, false, true, true, false, false], "version": "0.1.0"},
+        "gib_pad_x04": {"val": [], "version": "0.1.0", "len": 2},
+        "bomb_rain": {"val": 0, "version": "0.1.0"},
+        "gib_pad_x07": {"val": 0, "version": "0.1.0"},
+        "is_teams": {"val": 0, "version": "0.1.0"},
+        "gib_pad_x09": {"val": [], "version": "0.1.0", "len": 2},
+        "item_spawn_behavior": {"val": -1, "version": "0.1.0"},
+        "self_destruct_score_value": {"val": -1, "version": "0.1.0"},
+        "gib_pad_x0D": {"val": 110, "version": "0.1.0"},
+        "stage": {"val": 0, "version": "0.1.0"},
+        "game_timer": {"val": 480, "version": "0.1.0"},
+        "gib_pad_x11": {"val": [], "version": "0.1.0", "len": 15},
+        "item_spawn_bitfield_1": {"val": [true, true, true, true, true, true, true, true], "version": "0.1.0"},
+        "item_spawn_bitfield_2": {"val": [true, true, true, true, true, true, true, true], "version": "0.1.0"},
+        "item_spawn_bitfield_3": {"val": [true, true, true, true, true, true, true, true], "version": "0.1.0"},
+        "item_spawn_bitfield_4": {"val": [true, true, true, true, true, true, true, true], "version": "0.1.0"},
+        "item_spawn_bitfield_5": {"val": [true, true, true, true, true, true, true, true], "version": "0.1.0"},
+        "gib_pad_x28": {"val": [], "version": "0.1.0", "len": 4},
+        "unk_float_x3C": {"val": 1.0, "version": "0.1.0"},
+        "damage_ratio": {"val": 1.0, "version": "0.1.0"},
+        "unk_float_x44": {"val": 1.0, "version": "0.1.0"},
+        "gib_pad_x34": {"val": [], "version": "0.1.0", "len": 40},
+        "player_data":
+        [
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            },
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            },
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            },
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            },
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            },
+            {
+                "external_character_id": {"val": 0, "version": "0.1.0"},
+                "player_type": {"val": 3, "version": "0.1.0"},
+                "stock_start_count": {"val": 4, "version": "0.1.0"},
+                "costume_index": {"val": 1, "version": "0.1.0"},
+                "gib_pad_x64": {"val": [], "version": "0.1.0", "len": 3},
+                "team_shade": {"val": 0, "version": "0.1.0"},
+                "handicap": {"val": 9, "version": "0.1.0"},
+                "team_id": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x6A": {"val": [], "version": "0.1.0", "len": 2},
+                "player_bitfield": {"val": [true, true, false, false, false, false, false, false], "version": "0.1.0"},
+                "gib_pad_x6D": {"val": [], "version": "0.1.0", "len": 2},
+                "cpu_level": {"val": 1, "version": "0.1.0"},
+                "damage_start": {"val": 0, "version": "0.1.0"},
+                "damage_spawn": {"val": 0, "version": "0.1.0"},
+                "gib_pad_x74": {"val": [], "version": "0.1.0", "len": 4},
+                "offense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "defense_ratio": {"val": 1.0, "version": "0.1.0"},
+                "model_scale": {"val": 1.0, "version": "0.1.0"}
+            }
+        ]
+
+    },
+    "random_seed": {"val": 0, "version": "0.1.0"},
+    "start_fixes":
+    [
+        {
+            "dashback_fix": {"val": 0, "version": "1.0.0"},
+            "shield_drop_fix": {"val": 0, "version": "1.0.0"}
+        },
+        {
+            "dashback_fix": {"val": 0, "version": "1.0.0"},
+            "shield_drop_fix": {"val": 0, "version": "1.0.0"}
+        },
+        {
+            "dashback_fix": {"val": 0, "version": "1.0.0"},
+            "shield_drop_fix": {"val": 0, "version": "1.0.0"}
+        },
+        {
+            "dashback_fix": {"val": 0, "version": "1.0.0"},
+            "shield_drop_fix": {"val": 0, "version": "1.0.0"}
+        }
+    ],
+    "nametags":
+    [
+        {"val": [], "version": "1.3.0", "len": 8},
+        {"val": [], "version": "1.3.0", "len": 8},
+        {"val": [], "version": "1.3.0", "len": 8},
+        {"val": [], "version": "1.3.0", "len": 8}
+
+    ],
+    "pal": {"val": 0, "version": "1.5.0"},
+    "frozen_ps": {"val": 0, "version": "2.0.0"},
+    "minor_scene": {"val": 2, "version": "3.7.0"},
+    "major_scene": {"val": 2, "version": "3.7.0"},
+    "display_name":
+    [
+        {
+            "display_name": {"val": [], "version": "3.9.0", "len": 15},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "display_name": {"val": [], "version": "3.9.0", "len": 15},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "display_name": {"val": [], "version": "3.9.0", "len": 15},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "display_name": {"val": [], "version": "3.9.0", "len": 15},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        }
+    ],
+    "connect_code":
+    [
+        {
+            "connect_code_str": {"val": "", "version": "3.9.0", "len": 4},
+            "connect_code_hash": {"val": 33172, "version": "3.9.0"},
+            "connect_code_num": {"val": "", "version": "3.9.0", "len": 3},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "connect_code_str": {"val": "", "version": "3.9.0", "len": 4},
+            "connect_code_hash": {"val": 33172, "version": "3.9.0"},
+            "connect_code_num": {"val": "", "version": "3.9.0", "len": 3},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "connect_code_str": {"val": "", "version": "3.9.0", "len": 4},
+            "connect_code_hash": {"val": 33172, "version": "3.9.0"},
+            "connect_code_num": {"val": "", "version": "3.9.0", "len": 3},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        },
+        {
+            "connect_code_str": {"val": "", "version": "3.9.0", "len": 4},
+            "connect_code_hash": {"val": 33172, "version": "3.9.0"},
+            "connect_code_num": {"val": "", "version": "3.9.0", "len": 3},
+            "null_terminator": {"val": 0, "version": "3.9.0"}
+        }
+    ],
+    "slippi_uid":
+    [
+        {"val": "", "version": "3.11.0", "len": 29},
+        {"val": "", "version": "3.11.0", "len": 29},
+        {"val": "", "version": "3.11.0", "len": 29},
+        {"val": "", "version": "3.11.0", "len": 29}
+    ],
+    "language_option": {"val": 1, "version": "3.12.0"},
+    "match_id": {"val": "", "version": "3.14.0", "len": 51},
+    "game_number": {"val": 1, "version": "3.14.0"},
+    "tiebreaker_number": {"val": 0, "version": "3.14.0"}
+
+}
