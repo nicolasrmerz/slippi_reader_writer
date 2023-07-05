@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-from .common import U8Data, U16Data, U32Data, S8Data, S16Data, S32Data, F32Data, StringData
 from typing import List
+
+from .common import (F32Data, S8Data, S16Data, S32Data, StringData, U8Data,
+                     U16Data, U32Data)
+
 
 @dataclass
 class OtherEventPayloads:

@@ -1,9 +1,15 @@
 import sys
+
 sys.path.append("..")
-from typing import List
-from slp_dataclasses.common import BinData, U8Data, U16Data, U32Data, S8Data, S16Data, S32Data, F32Data, U8BitFlagData, StringData, ArrayData, ShiftJISStringData
 from dataclasses import dataclass
+from typing import List
+
 from dacite import from_dict
+
+from slp_dataclasses.common import (ArrayData, BinData, F32Data, S8Data,
+                                    S16Data, S32Data, ShiftJISStringData,
+                                    StringData, U8BitFlagData, U8Data, U16Data,
+                                    U32Data)
 
 
 def test_dacite():
@@ -20,15 +26,13 @@ def test_dacite():
     data = {
         "str": {"val": "hello", "len": 5},
         "u16": {"val": 65535},
-        "u8": {"val": 255}
+        "u8": {"val": 255},
     }
-
 
     td = from_dict(data_class=TestDacite, data=data)
 
     data = {
-        "u8":
-        [
+        "u8": [
             {"val": 255},
             {"val": 0},
             {"val": 255},
@@ -37,6 +41,7 @@ def test_dacite():
     }
 
     td = from_dict(data_class=TestDacite2, data=data)
+
 
 if __name__ == "__main__":
     test_dacite()

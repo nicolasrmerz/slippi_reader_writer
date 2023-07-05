@@ -1,6 +1,10 @@
-from typing import List
 from dataclasses import dataclass
-from .common import U8Data, U16Data, U32Data, S8Data, S16Data, S32Data, F32Data, ArrayData, StringData, ShiftJISStringData, U8BitFlagData
+from typing import List
+
+from .common import (ArrayData, F32Data, S8Data, S16Data, S32Data,
+                     ShiftJISStringData, StringData, U8BitFlagData, U8Data,
+                     U16Data, U32Data)
+
 
 @dataclass
 class Version:
@@ -8,6 +12,7 @@ class Version:
     minor: U8Data
     build: U8Data
     unused: U8Data
+
 
 @dataclass
 class PlayerData:
@@ -29,6 +34,7 @@ class PlayerData:
     offense_ratio: F32Data
     defense_ratio: F32Data
     model_scale: F32Data
+
 
 @dataclass
 class GameInfoBlock:
@@ -59,15 +65,18 @@ class GameInfoBlock:
     gib_pad_x34: ArrayData
     player_data: List[PlayerData]
 
+
 @dataclass
 class StartFixes:
     dashback_fix: U32Data
     shield_drop_fix: U32Data
 
+
 @dataclass
 class DisplayName:
     display_name: ShiftJISStringData
     null_terminator: U8Data
+
 
 @dataclass
 class ConnectCode:
@@ -75,6 +84,7 @@ class ConnectCode:
     connect_code_hash: U16Data
     connect_code_num: StringData
     null_terminator: U8Data
+
 
 @dataclass
 class Start:
@@ -95,4 +105,3 @@ class Start:
     match_id: StringData
     game_number: U32Data
     tiebreaker_number: U32Data
-
