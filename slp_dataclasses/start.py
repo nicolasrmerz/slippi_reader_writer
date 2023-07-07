@@ -1,9 +1,19 @@
 from dataclasses import dataclass
 from typing import List
 
-from .common import (ArrayData, F32Data, S8Data, S16Data, S32Data,
-                     ShiftJISStringData, StringData, U8BitFlagData, U8Data,
-                     U16Data, U32Data)
+from .common import (
+    ArrayData,
+    F32Data,
+    S8Data,
+    S16Data,
+    S32Data,
+    ShiftJISStringData,
+    StringData,
+    U8BitFlagData,
+    U8Data,
+    U16Data,
+    U32Data,
+)
 
 
 @dataclass

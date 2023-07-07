@@ -6,10 +6,20 @@ from typing import List
 
 from dacite import from_dict
 
-from slp_dataclasses.common import (ArrayData, BinData, F32Data, S8Data,
-                                    S16Data, S32Data, ShiftJISStringData,
-                                    StringData, U8BitFlagData, U8Data, U16Data,
-                                    U32Data)
+from slp_dataclasses.common import (
+    ArrayData,
+    BinData,
+    F32Data,
+    S8Data,
+    S16Data,
+    S32Data,
+    ShiftJISStringData,
+    StringData,
+    U8BitFlagData,
+    U8Data,
+    U16Data,
+    U32Data,
+)
 
 
 def test_dacite():
