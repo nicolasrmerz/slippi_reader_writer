@@ -3,10 +3,9 @@ from typing import List
 
 from .common import (
     ArrayData,
+    BinData,
     F32Data,
     S8Data,
-    S16Data,
-    S32Data,
     ShiftJISStringData,
     StringData,
     U8BitFlagData,
@@ -17,7 +16,7 @@ from .common import (
 
 
 @dataclass
-class Version:
+class Version(BinData):
     major: U8Data
     minor: U8Data
     build: U8Data
@@ -25,7 +24,7 @@ class Version:
 
 
 @dataclass
-class PlayerData:
+class PlayerData(BinData):
     external_character_id: U8Data
     player_type: U8Data
     stock_start_count: U8Data
@@ -47,7 +46,7 @@ class PlayerData:
 
 
 @dataclass
-class GameInfoBlock:
+class GameInfoBlock(BinData):
     game_bitfield_1: U8BitFlagData
     game_bitfield_2: U8BitFlagData
     game_bitfield_3: U8BitFlagData
@@ -77,19 +76,19 @@ class GameInfoBlock:
 
 
 @dataclass
-class StartFixes:
+class StartFixes(BinData):
     dashback_fix: U32Data
     shield_drop_fix: U32Data
 
 
 @dataclass
-class DisplayName:
+class DisplayName(BinData):
     display_name: ShiftJISStringData
     null_terminator: U8Data
 
 
 @dataclass
-class ConnectCode:
+class ConnectCode(BinData):
     connect_code_str: StringData
     connect_code_hash: U16Data
     connect_code_num: StringData
@@ -97,7 +96,7 @@ class ConnectCode:
 
 
 @dataclass
-class Start:
+class GameStart(BinData):
     command_byte: U8Data
     version: Version
     game_info_block: GameInfoBlock

@@ -1,12 +1,34 @@
 import struct
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from typing import List, Union
 
 from packaging import version
 
 
-@dataclass(kw_only=True)
+@dataclass
 class BinData:
+    @staticmethod
+    def recursive_read(o, stream, given_version, ignore_fields=[]):
+        if isinstance(o, BinData):
+            for f in fields(o):
+                if f.name in ignore_fields:
+                    continue
+                attr = getattr(o, f.name)
+                BinData.recursive_read(attr, stream, given_version, ignore_fields)
+        elif isinstance(o, BinPrimitive):
+            o.read(stream, given_version)
+        elif isinstance(o, list):
+            for e in o:
+                BinData.recursive_read(e, stream, given_version, ignore_fields)
+        else:
+            raise NotImplementedError(f"No read implementation for {type(o)}")
+
+    def read(self, stream, given_version, ignore_fields=[]):
+        BinData.recursive_read(self, stream, given_version, ignore_fields)
+
+
+@dataclass(kw_only=True)
+class BinPrimitive:
     val: Union[float, int, str]
     data_type: type = int
     format_char: str = ">B"
@@ -22,70 +44,70 @@ class BinData:
         return b
 
     def read(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         # b = stream.read(struct.unpack(self.format_char))
         b = self._read(stream)
         self.val = self.data_type(b)
 
     def write(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         stream.write(struct.pack(self.format_char, self.val))
 
 
 # These don't serve much purpose - they just make classes a little more annotated
 @dataclass(kw_only=True)
-class U8Data(BinData):
+class U8Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">B"
 
 
 @dataclass(kw_only=True)
-class U16Data(BinData):
+class U16Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">H"
 
 
 @dataclass(kw_only=True)
-class U32Data(BinData):
+class U32Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">L"
 
 
 @dataclass(kw_only=True)
-class S8Data(BinData):
+class S8Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">b"
 
 
 @dataclass(kw_only=True)
-class S16Data(BinData):
+class S16Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">h"
 
 
 @dataclass(kw_only=True)
-class S32Data(BinData):
+class S32Data(BinPrimitive):
     val: int
     data_type: type = int
     format_char: str = ">l"
 
 
 @dataclass(kw_only=True)
-class F32Data(BinData):
+class F32Data(BinPrimitive):
     val: float
     data_type: type = float
     format_char: str = ">f"
 
 
 @dataclass(kw_only=True)
-class U8BitFlagData(BinData):
+class U8BitFlagData(BinPrimitive):
     val: List[bool] = field(default_factory=lambda: [False] * 8)
     format_char: str = ">B"
 
@@ -96,10 +118,10 @@ class U8BitFlagData(BinData):
             )
 
     def read(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         b = self._read(stream)
-        binary = bin(int(str(b)))[2:]
+        binary = bin(int(str(b)))[2:].zfill(8)
 
         # Should not be possible since we're reading a >B format char, but sanity check
         if len(binary) != 8:
@@ -107,14 +129,14 @@ class U8BitFlagData(BinData):
         self.val = [False if c == "0" else True for c in binary]
 
     def write(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         b = int("".join([str(int(v)) for v in self.val]), 2)
         stream.write(struct.pack(self.format_char, b))
 
 
 @dataclass(kw_only=True)
-class ArrayData(BinData):
+class ArrayData(BinPrimitive):
     val: List[int]
     len: int
     format_char: str = ">B"
@@ -127,7 +149,7 @@ class ArrayData(BinData):
         return b
 
     def read(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         self.val = self._read(stream)
 
@@ -136,7 +158,7 @@ class ArrayData(BinData):
         return bytearray(val[: self.len]) + b"\0" * (self.len - len(val))
 
     def write(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         b_array = self._write(self.val)
         stream.write(b_array)
@@ -148,13 +170,13 @@ class StringData(ArrayData):
     val: str
 
     def read(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         val_arr = self._read(stream)
         self.val = "".join([chr(c) for c in val_arr])
 
     def write(self, stream, given_version):
-        if not self.compare_version(given_version):
+        if given_version and not self.compare_version(given_version):
             return
         val_arr = [ord(c) for c in self.val]
         b_array = self._write(val_arr)

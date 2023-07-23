@@ -8,7 +8,7 @@ from dacite import from_dict
 
 from slp_dataclasses.common import (
     ArrayData,
-    BinData,
+    BinPrimitive,
     F32Data,
     S8Data,
     S16Data,

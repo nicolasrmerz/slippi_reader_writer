@@ -7,7 +7,7 @@ sys.path.append("..")
 
 from slp_dataclasses.common import (
     ArrayData,
-    BinData,
+    BinPrimitive,
     F32Data,
     S8Data,
     S16Data,
@@ -22,7 +22,7 @@ from slp_dataclasses.common import (
 
 
 # test_tuples is a list of tuples of form (input_b_string, expected_value)
-def read_test(dclass_instance: BinData, test_tuples: List[Tuple]):
+def read_test(dclass_instance: BinPrimitive, test_tuples: List[Tuple]):
     for input_b_string, expected_value in test_tuples:
         stream = io.BytesIO(input_b_string)
 
@@ -33,7 +33,7 @@ def read_test(dclass_instance: BinData, test_tuples: List[Tuple]):
 
 
 # test_tuples is a list of tuples of form (input_value, expected_b_string)
-def write_test(dclass_instance: BinData, test_tuples: List[Tuple]):
+def write_test(dclass_instance: BinPrimitive, test_tuples: List[Tuple]):
     for input_value, expected_b_string in test_tuples:
         stream = io.BytesIO()
 

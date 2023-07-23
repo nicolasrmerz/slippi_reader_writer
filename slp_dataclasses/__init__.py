@@ -1,2 +1,2 @@
 from .eventpayloads import EventPayloads
-from .start import Start
+from .start import GameStart
