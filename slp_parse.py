@@ -60,6 +60,8 @@ class SlpBin:
             ), "Read payload size differs from payload size defined in EventPayloads"
             total_read = new_stream_loc
 
+        assert total_read - start_offset == self.total_bin_len, "Mismatch between actual read size and size listed in UBJSON header"
+
     @staticmethod
     def parse_version(stream):
         return struct.unpack(">BBBB", stream.read(4))
