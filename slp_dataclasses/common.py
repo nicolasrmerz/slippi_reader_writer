@@ -23,8 +23,25 @@ class BinData:
         else:
             raise NotImplementedError(f"No read implementation for {type(o)}")
 
+    @staticmethod
+    def recursive_write(o, stream, given_version):
+        if isinstance(o, BinData):
+            for f in fields(o):
+                attr = getattr(o, f.name)
+                BinData.recursive_write(attr, stream, given_version)
+        elif isinstance(o, BinPrimitive):
+            o.write(stream, given_version)
+        elif isinstance(o, list):
+            for e in o:
+                BinData.recursive_write(e, stream, given_version)
+        else:
+            raise NotImplementedError(f"No read implementation for {type(o)}")
+
     def read(self, stream, given_version, ignore_fields=[]):
         BinData.recursive_read(self, stream, given_version, ignore_fields)
+
+    def write(self, stream, given_version):
+        BinData.recursive_write(self, stream, given_version)
 
 
 @dataclass(kw_only=True)

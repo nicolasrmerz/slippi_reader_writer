@@ -1,6 +1,7 @@
 import json
 import os
 import struct
+from typing import Optional
 
 from dacite import from_dict
 
@@ -10,9 +11,9 @@ from slp_dataclasses.eventpayloads import generate_payload_size_dict
 
 class SlpBin:
     def __init__(self, config_dir):
-        self.event_payloads = None
-        self.payload_size_dict = None
-        self.version = None
+        self.event_payloads: Optional[EventPayloads] = None
+        self.payload_size_dict: dict = dict()
+        self.version: str = ""
         # pre_frame_update_template: PreFrameUpdate
         # post_frame_update_template: PostFrameUpdate
         self.game_start = self.init_game_start(config_dir)
@@ -26,7 +27,7 @@ class SlpBin:
             data = json.load(f)
         return from_dict(data_class=GameStart, data=data)
 
-    def parse_ubjson_header(self, stream):
+    def read_ubjson_header(self, stream):
         # 15 characters:
         # { U 3 r a w [ $ U # l X X X X
         # X X X X is total size of the binary
@@ -36,7 +37,7 @@ class SlpBin:
         return bin_len
 
     def read(self, stream):
-        self.total_bin_len = self.parse_ubjson_header(stream)
+        self.total_bin_len = self.read_ubjson_header(stream)
         start_offset = stream.tell()
         self.event_payloads = EventPayloads.read(stream)
         self.payload_size_dict = generate_payload_size_dict(self.event_payloads)
@@ -60,7 +61,9 @@ class SlpBin:
             ), "Read payload size differs from payload size defined in EventPayloads"
             total_read = new_stream_loc
 
-        assert total_read - start_offset == self.total_bin_len, "Mismatch between actual read size and size listed in UBJSON header"
+        assert (
+            total_read - start_offset == self.total_bin_len
+        ), "Mismatch between actual read size and size listed in UBJSON header"
 
     @staticmethod
     def parse_version(stream):
@@ -81,14 +84,32 @@ class SlpBin:
             stream, self.version, ignore_fields=["command_byte", "version"]
         )
 
+    def write_ubjson_header(self, stream, size):
+        stream.write(
+            b"{U" + struct.pack(">B", 3) + b"raw[$U#l" + struct.pack(">I", size)
+        )
+
+    def write(self, stream):
+        # if for whatever odd reason this stream does not start at 0
+        location_0 = stream.tell()
+        self.write_ubjson_header(stream, 0)
+        start_offset = stream.tell()
+
+        # Main payload writes
+        self.event_payloads.write(stream, self.version)
+        self.game_start.write(stream, self.version)
+
+        total_written = stream.tell() - start_offset
+
+        stream.seek(location_0)
+        self.write_ubjson_header(stream, total_written)
+
 
 if __name__ == "__main__":
-    # with open("configs/start_defaults.json", "r") as f:
-    #     data = json.load(f)
-    #
-    # slp_bin = from_dict(data_class=Start, data=data)
-    # print(slp_bin)
     slp_bin = SlpBin("configs")
 
     with open("samples/offline.slp", "rb") as f:
         slp_bin.read(f)
+
+    with open("samples/test_out.slp", "wb") as f:
+        slp_bin.write(f)

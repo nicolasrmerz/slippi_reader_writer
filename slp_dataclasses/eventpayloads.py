@@ -1,16 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from .common import (
-    F32Data,
-    S8Data,
-    S16Data,
-    S32Data,
-    StringData,
-    U8Data,
-    U16Data,
-    U32Data,
-)
+from .common import U8Data, U16Data
 
 
 def generate_payload_size_dict(epl):
@@ -24,6 +15,10 @@ def generate_payload_size_dict(epl):
 class BasePayload:
     command_byte: U8Data
     payload_size: U8Data
+
+    def write(self, stream, given_version):
+        self.command_byte.write(stream, given_version)
+        self.payload_size.write(stream, given_version)
 
 
 @dataclass
@@ -63,3 +58,9 @@ class EventPayloads(BasePayload):
             epl.other_cmds.append(OtherEventPayloads.read(stream))
 
         return epl
+
+    def write(self, stream, given_version):
+        super().write(stream, given_version)
+
+        for pl in self.other_cmds:
+            pl.write(stream, given_version)
