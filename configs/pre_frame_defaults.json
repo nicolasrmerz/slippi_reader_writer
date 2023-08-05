@@ -1,0 +1,23 @@
+{
+    "command_byte": {"val": 55, "version": "0.1.0"},
+    "frame_number": {"val": 0, "version": "0.1.0"},
+    "player_index": {"val": 0, "version": "0.1.0"},
+    "is_follower": {"val": 0, "version": "0.1.0"},
+    "random_seed": {"val": 0, "version": "0.1.0"},
+    "action_state_id": {"val": 0, "version": "0.1.0"},
+    "x_position": {"val": 0.0, "version": "0.1.0"},
+    "y_position": {"val": 0.0, "version": "0.1.0"},
+    "facing_direction": {"val": 0.0, "version": "0.1.0"},
+    "joystick_x": {"val": 0.0, "version": "0.1.0"},
+    "joystick_y": {"val": 0.0, "version": "0.1.0"},
+    "cstick_x": {"val": 0.0, "version": "0.1.0"},
+    "cstick_y": {"val": 0.0, "version": "0.1.0"},
+    "trigger": {"val": 0.0, "version": "0.1.0"},
+    "processed_buttons": {"val": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false], "version": "0.1.0"},
+    "physical_buttons": {"val": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false], "version": "0.1.0"},
+    "physical_l_trigger": {"val": 0.0, "version": "0.1.0"},
+    "physical_r_trigger": {"val": 0.0, "version": "0.1.0"},
+    "x_analog_for_ucf": {"val": 0, "version": "1.2.0"},
+    "percent": {"val": 0.0, "version": "1.4.0"}
+
+}

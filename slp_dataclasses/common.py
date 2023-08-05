@@ -125,24 +125,27 @@ class F32Data(BinPrimitive):
 
 @dataclass(kw_only=True)
 class U8BitFlagData(BinPrimitive):
+    bitflag_len: int = 8
     val: List[bool] = field(default_factory=lambda: [False] * 8)
     format_char: str = ">B"
 
     def __post_init__(self):
-        if len(self.val) != 8:
+        if len(self.val) != self.bitflag_len:
             raise ValueError(
-                "Length of bitfield in instantiated U8BitFlagData must be 8"
+                f"Length of bitfield in instantiated {type(self).__name__} must be {self.bitflag_len}"
             )
 
     def read(self, stream, given_version):
         if given_version and not self.compare_version(given_version):
             return
         b = self._read(stream)
-        binary = bin(int(str(b)))[2:].zfill(8)
+        binary = bin(int(str(b)))[2:].zfill(self.bitflag_len)
 
         # Should not be possible since we're reading a >B format char, but sanity check
-        if len(binary) != 8:
-            raise ValueError("Length of read bitfield in U8BitFlagData must be 8")
+        if len(binary) != self.bitflag_len:
+            raise ValueError(
+                f"Length of read bitfield in {type(self).__name__} must be {self.bitflag_len}"
+            )
         self.val = [False if c == "0" else True for c in binary]
 
     def write(self, stream, given_version):
@@ -150,6 +153,20 @@ class U8BitFlagData(BinPrimitive):
             return
         b = int("".join([str(int(v)) for v in self.val]), 2)
         stream.write(struct.pack(self.format_char, b))
+
+
+@dataclass(kw_only=True)
+class U16BitFlagData(U8BitFlagData):
+    bitflag_len: int = 16
+    val: List[bool] = field(default_factory=lambda: [False] * 16)
+    format_char: str = ">H"
+
+
+@dataclass(kw_only=True)
+class U32BitFlagData(U8BitFlagData):
+    bitflag_len: int = 32
+    val: List[bool] = field(default_factory=lambda: [False] * 32)
+    format_char: str = ">L"
 
 
 @dataclass(kw_only=True)
