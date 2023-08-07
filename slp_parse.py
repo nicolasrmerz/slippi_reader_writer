@@ -2,12 +2,44 @@ import copy
 import json
 import os
 import struct
-from typing import Optional
+from itertools import zip_longest
+from typing import Optional, Union
 
 from dacite import from_dict
 
-from slp_dataclasses import EventPayloads, GameStart, PreFrameUpdate, PostFrameUpdate
+from slp_dataclasses import EventPayloads, GameStart, PostFrameUpdate, PreFrameUpdate
 from slp_dataclasses.eventpayloads import generate_payload_size_dict
+
+# How to offset from the very first frame of the game to 0
+# the lowest frame_number is -123
+FRAME_OFFSET = 123
+
+
+class FrameList:
+    def __init__(self):
+        self.flist: list[list[Union[PreFrameUpdate, PostFrameUpdate]]] = [
+            [],
+            [],
+            [],
+            [],
+        ]
+
+    def add_frame(self, f: Union[PreFrameUpdate, PostFrameUpdate]):
+        p_index = f.player_index.val
+        frame_num = f.frame_number.val + FRAME_OFFSET
+        sub_list = self.flist[p_index]
+
+        # TODO: I think this is how rollback works? If frame_number decreases, there's been a rollback
+        if frame_num == len(sub_list):
+            sub_list.append(f)
+        else:
+            sub_list[frame_num] = f
+
+    # Iterate over frame numbers
+    def __iter__(self):
+        # for (f0, f1, f2, f3) in zip_longest(self.flist):
+        for f in zip_longest(*self.flist):
+            yield f
 
 
 class SlpBin:
@@ -15,9 +47,8 @@ class SlpBin:
         self.event_payloads: Optional[EventPayloads] = None
         self.payload_size_dict: dict = dict()
         self.version: str = ""
-        # TODO: self.pre_frames and self.post_frames need to be a 2D list (4 x num_frames) since binary has batch of pres followed by batch of posts
-        self.pre_frames: list[PreFrameUpdate] = list()
-        self.post_frames: list[PostFrameUpdate] = list()
+        self.pre_frames: FrameList = FrameList()
+        self.post_frames: FrameList = FrameList()
         self.game_start: GameStart = self.init_dataclass(
             config_dir, "start_defaults.json", GameStart
         )
@@ -105,7 +136,7 @@ class SlpBin:
 
     def write_gecko_code(self, stream):
         if self.gecko_code:
-            stream.write(struct.pack('>B', self.gecko_cmd_byte))
+            stream.write(struct.pack(">B", self.gecko_cmd_byte))
             stream.write(self.gecko_code)
 
     def parse_pre_frame_update(self, cmd_byte, stream):
@@ -113,14 +144,14 @@ class SlpBin:
         pfu.command_byte.val = cmd_byte
 
         pfu.read(stream, self.version, ignore_fields=["command_byte"])
-        self.pre_frames.append(pfu)
+        self.pre_frames.add_frame(pfu)
 
     def parse_post_frame_update(self, cmd_byte, stream):
         pfu = copy.deepcopy(self.post_frame_update_template)
         pfu.command_byte.val = cmd_byte
 
         pfu.read(stream, self.version, ignore_fields=["command_byte"])
-        self.post_frames.append(pfu)
+        self.post_frames.add_frame(pfu)
 
     def write_ubjson_header(self, stream, size):
         stream.write(
@@ -138,9 +169,13 @@ class SlpBin:
         self.game_start.write(stream, self.version)
         self.write_gecko_code(stream)
 
-        for pre, post in zip(self.pre_frames, self.post_frames):
-            pre.write(stream, self.version)
-            post.write(stream, self.version)
+        for pres, posts in zip(self.pre_frames, self.post_frames):
+            for pre in pres:
+                if pre:
+                    pre.write(stream, self.version)
+            for post in posts:
+                if post:
+                    post.write(stream, self.version)
 
         total_written = stream.tell() - start_offset
 
