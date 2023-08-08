@@ -79,6 +79,8 @@ class SlpBin:
             0x39: self.parse_game_end,
         }
 
+        self.metadata: Optional[bytes] = None
+
     def init_dataclass(self, config_dir, filename, class_type):
         with open(os.path.join(config_dir, filename), "r") as f:
             data = json.load(f)
@@ -121,6 +123,9 @@ class SlpBin:
         assert (
             total_read - start_offset == self.total_bin_len
         ), "Mismatch between actual read size and size listed in UBJSON header"
+
+        # Read till end to get metadata
+        self.metadata = stream.read()
 
     @staticmethod
     def parse_version(stream):
@@ -198,6 +203,8 @@ class SlpBin:
         self.game_end.write(stream, self.version)
 
         total_written = stream.tell() - start_offset
+
+        stream.write(self.metadata)
 
         stream.seek(location_0)
         self.write_ubjson_header(stream, total_written)
