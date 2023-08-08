@@ -1,0 +1,12 @@
+{
+  "command_byte": {"val": 57, "version": "0.1.0"},
+  "game_end_method": {"val": 0, "version": "0.1.0"},
+  "lras_initiator": {"val": -1, "version": "2.0.0"},
+  "player_placements":
+  [
+    {"val": -1, "version": "3.13.0"},
+    {"val": -1, "version": "3.13.0"},
+    {"val": -1, "version": "3.13.0"},
+    {"val": -1, "version": "3.13.0"}
+  ]
+}

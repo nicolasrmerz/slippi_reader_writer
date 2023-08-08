@@ -7,7 +7,13 @@ from typing import Optional, Union
 
 from dacite import from_dict
 
-from slp_dataclasses import EventPayloads, GameStart, PostFrameUpdate, PreFrameUpdate
+from slp_dataclasses import (
+    EventPayloads,
+    GameEnd,
+    GameStart,
+    PostFrameUpdate,
+    PreFrameUpdate,
+)
 from slp_dataclasses.eventpayloads import generate_payload_size_dict
 
 # How to offset from the very first frame of the game to 0
@@ -50,7 +56,7 @@ class SlpBin:
         self.pre_frames: FrameList = FrameList()
         self.post_frames: FrameList = FrameList()
         self.game_start: GameStart = self.init_dataclass(
-            config_dir, "start_defaults.json", GameStart
+            config_dir, "game_start_defaults.json", GameStart
         )
         self.gecko_cmd_byte = None
         self.gecko_code = None
@@ -61,11 +67,16 @@ class SlpBin:
             config_dir, "post_frame_defaults.json", PostFrameUpdate
         )
 
+        self.game_end: GameEnd = self.init_dataclass(
+            config_dir, "game_end_defaults.json", GameEnd
+        )
+
         self.CMD_BYTE_PARSER_MAP = {
             0x36: self.parse_game_start,
             0x37: self.parse_pre_frame_update,
             0x38: self.parse_post_frame_update,
             0x3D: self.parse_gecko_code,
+            0x39: self.parse_game_end,
         }
 
     def init_dataclass(self, config_dir, filename, class_type):
@@ -130,6 +141,13 @@ class SlpBin:
             stream, self.version, ignore_fields=["command_byte", "version"]
         )
 
+    def parse_game_end(self, cmd_byte, stream):
+        self.game_end.command_byte.val = cmd_byte
+
+        self.game_end.read(
+            stream, self.version, ignore_fields=["command_byte"]
+        )
+
     def parse_gecko_code(self, cmd_byte, stream):
         self.gecko_cmd_byte = cmd_byte
         self.gecko_code = stream.read(self.payload_size_dict[cmd_byte])
@@ -176,6 +194,8 @@ class SlpBin:
             for post in posts:
                 if post:
                     post.write(stream, self.version)
+
+        self.game_end.write(stream, self.version)
 
         total_written = stream.tell() - start_offset
 
