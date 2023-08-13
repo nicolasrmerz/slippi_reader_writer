@@ -9,43 +9,13 @@ from dacite import from_dict
 
 from slp_dataclasses import (
     EventPayloads,
+    FrameList,
     GameEnd,
     GameStart,
     PostFrameUpdate,
     PreFrameUpdate,
 )
 from slp_dataclasses.eventpayloads import generate_payload_size_dict
-
-# How to offset from the very first frame of the game to 0
-# the lowest frame_number is -123
-FRAME_OFFSET = 123
-
-
-class FrameList:
-    def __init__(self):
-        self.flist: list[list[Union[PreFrameUpdate, PostFrameUpdate]]] = [
-            [],
-            [],
-            [],
-            [],
-        ]
-
-    def add_frame(self, f: Union[PreFrameUpdate, PostFrameUpdate]):
-        p_index = f.player_index.val
-        frame_num = f.frame_number.val + FRAME_OFFSET
-        sub_list = self.flist[p_index]
-
-        # TODO: I think this is how rollback works? If frame_number decreases, there's been a rollback
-        if frame_num == len(sub_list):
-            sub_list.append(f)
-        else:
-            sub_list[frame_num] = f
-
-    # Iterate over frame numbers
-    def __iter__(self):
-        # for (f0, f1, f2, f3) in zip_longest(self.flist):
-        for f in zip_longest(*self.flist):
-            yield f
 
 
 class SlpBin:
@@ -149,9 +119,7 @@ class SlpBin:
     def parse_game_end(self, cmd_byte, stream):
         self.game_end.command_byte.val = cmd_byte
 
-        self.game_end.read(
-            stream, self.version, ignore_fields=["command_byte"]
-        )
+        self.game_end.read(stream, self.version, ignore_fields=["command_byte"])
 
     def parse_gecko_code(self, cmd_byte, stream):
         self.gecko_cmd_byte = cmd_byte
@@ -213,7 +181,7 @@ class SlpBin:
 if __name__ == "__main__":
     slp_bin = SlpBin("configs")
 
-    with open("samples/offline.slp", "rb") as f:
+    with open("samples/offline_2.slp", "rb") as f:
         slp_bin.read(f)
 
     with open("samples/test_out.slp", "wb") as f:
