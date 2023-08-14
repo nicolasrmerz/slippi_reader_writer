@@ -12,10 +12,12 @@ from slp_dataclasses import (
     FrameList,
     GameEnd,
     GameStart,
+    MessageSplitter,
     PostFrameUpdate,
     PreFrameUpdate,
 )
 from slp_dataclasses.eventpayloads import generate_payload_size_dict
+from slp_dataclasses.gecko import GeckoCode
 
 
 class SlpBin:
@@ -28,8 +30,7 @@ class SlpBin:
         self.game_start: GameStart = self.init_dataclass(
             config_dir, "game_start_defaults.json", GameStart
         )
-        self.gecko_cmd_byte = None
-        self.gecko_code = None
+        self.gecko = self.init_gecko(config_dir)
         self.pre_frame_update_template: PreFrameUpdate = self.init_dataclass(
             config_dir, "pre_frame_defaults.json", PreFrameUpdate
         )
@@ -42,6 +43,7 @@ class SlpBin:
         )
 
         self.CMD_BYTE_PARSER_MAP = {
+            0x10: self.parse_gecko_split,
             0x36: self.parse_game_start,
             0x37: self.parse_pre_frame_update,
             0x38: self.parse_post_frame_update,
@@ -55,6 +57,12 @@ class SlpBin:
         with open(os.path.join(config_dir, filename), "r") as f:
             data = json.load(f)
         return from_dict(data_class=class_type, data=data)
+
+    def init_gecko(self, config_dir):
+        ms_template = self.init_dataclass(
+            config_dir, "message_splitter_defaults.json", MessageSplitter
+        )
+        return GeckoCode(ms_template)
 
     def read_ubjson_header(self, stream):
         # 15 characters:
@@ -96,6 +104,9 @@ class SlpBin:
 
         # Read till end to get metadata
         self.metadata = stream.read()
+
+    def parse_gecko_split(self, cmd_byte, stream):
+        self.gecko.add_message(cmd_byte, stream, self.version)
 
     @staticmethod
     def parse_version(stream):

@@ -1,7 +1,8 @@
 from itertools import zip_longest
 from typing import Union
 
-from slp_dataclasses import PostFrameUpdate, PreFrameUpdate
+from slp_dataclasses.preframeupdate import PreFrameUpdate
+from slp_dataclasses.postframeupdate import PostFrameUpdate
 
 # How to offset from the very first frame of the game to 0
 # the lowest frame_number is -123

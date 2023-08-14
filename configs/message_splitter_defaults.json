@@ -1,0 +1,7 @@
+{
+  "command_byte": {"val": 16, "version": "3.3.0"},
+  "fixed_size_block": {"val": [], "version": "3.3.0", "len": 512},
+  "actual_size": {"val": 0, "version": "3.3.0"},
+  "internal_command": {"val": 0, "version": "3.3.0"},
+  "last_message": {"val": 0, "version": "3.3.0"}
+}
