@@ -1,0 +1,6 @@
+{
+  "command_byte": {"val": 57, "version": "2.2.0"},
+  "frame_number": {"val": 0, "version": "2.2.0"},
+  "random_seed": {"val": 0, "version": "2.2.0"},
+  "scene_frame_counter": {"val": 0, "version": "3.10.0"}
+}

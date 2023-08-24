@@ -1,0 +1,5 @@
+{
+  "command_byte": {"val": 57, "version": "3.0.0"},
+  "frame_number": {"val": 0, "version": "3.0.0"},
+  "last_finalized_frame": {"val": 0, "version": "3.7.0"}
+}

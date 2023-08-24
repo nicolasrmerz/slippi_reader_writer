@@ -10,6 +10,8 @@ from dacite import from_dict
 from slp_dataclasses import (
     EventPayloads,
     FrameList,
+    FrameStart,
+    FrameBookend,
     GameEnd,
     GameStart,
     MessageSplitter,
@@ -27,15 +29,26 @@ class SlpBin:
         self.version: str = ""
         self.pre_frames: FrameList = FrameList()
         self.post_frames: FrameList = FrameList()
+        self.frame_starts: list = list()
+        self.frame_bookends: list = list()
         self.game_start: GameStart = self.init_dataclass(
             config_dir, "game_start_defaults.json", GameStart
         )
         self.gecko = self.init_gecko(config_dir)
+        self.gecko_code = None
+        self.gecko_cmd_byte = None
         self.pre_frame_update_template: PreFrameUpdate = self.init_dataclass(
             config_dir, "pre_frame_defaults.json", PreFrameUpdate
         )
         self.post_frame_update_template: PostFrameUpdate = self.init_dataclass(
             config_dir, "post_frame_defaults.json", PostFrameUpdate
+        )
+        self.frame_start_template: FrameStart = self.init_dataclass(
+            config_dir, "frame_start_defaults.json", FrameStart
+        )
+
+        self.frame_bookend_template: FrameBookend = self.init_dataclass(
+            config_dir, "frame_bookend_defaults.json", FrameBookend
         )
 
         self.game_end: GameEnd = self.init_dataclass(
@@ -49,6 +62,8 @@ class SlpBin:
             0x38: self.parse_post_frame_update,
             0x3D: self.parse_gecko_code,
             0x39: self.parse_game_end,
+            0x3A: self.parse_frame_start,
+            0x3C: self.parse_frame_bookend,
         }
 
         self.metadata: Optional[bytes] = None
@@ -140,6 +155,9 @@ class SlpBin:
         if self.gecko_code:
             stream.write(struct.pack(">B", self.gecko_cmd_byte))
             stream.write(self.gecko_code)
+        elif len(self.gecko):
+            self.gecko.write_message_splitter_list(stream, self.version)
+
 
     def parse_pre_frame_update(self, cmd_byte, stream):
         pfu = copy.deepcopy(self.pre_frame_update_template)
@@ -154,6 +172,20 @@ class SlpBin:
 
         pfu.read(stream, self.version, ignore_fields=["command_byte"])
         self.post_frames.add_frame(pfu)
+
+    def parse_frame_start(self, cmd_byte, stream):
+        fs = copy.deepcopy(self.frame_start_template)
+        fs.command_byte.val = cmd_byte
+
+        fs.read(stream, self.version, ignore_fields=["command_byte"])
+        self.frame_starts.append(fs)
+
+    def parse_frame_bookend(self, cmd_byte, stream):
+        fb = copy.deepcopy(self.frame_bookend_template)
+        fb.command_byte.val = cmd_byte
+
+        fb.read(stream, self.version, ignore_fields=["command_byte"])
+        self.frame_bookends.append(fb)
 
     def write_ubjson_header(self, stream, size):
         stream.write(
@@ -171,13 +203,15 @@ class SlpBin:
         self.game_start.write(stream, self.version)
         self.write_gecko_code(stream)
 
-        for pres, posts in zip(self.pre_frames, self.post_frames):
+        for start, pres, posts, bookend in zip(self.frame_starts, self.pre_frames, self.post_frames, self.frame_bookends):
+            start.write(stream, self.version)
             for pre in pres:
                 if pre:
                     pre.write(stream, self.version)
             for post in posts:
                 if post:
                     post.write(stream, self.version)
+            bookend.write(stream, self.version)
 
         self.game_end.write(stream, self.version)
 

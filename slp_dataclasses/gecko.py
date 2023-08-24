@@ -31,3 +31,6 @@ class GeckoCode:
     def write_message_splitter_list(self, stream, version):
         for m in self.message_splitter_list:
             m.write(stream, version)
+
+    def __len__(self):
+        return len(self.message_splitter_list)
