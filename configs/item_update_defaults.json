@@ -1,0 +1,19 @@
+{
+  "command_byte": {"val": 57, "version": "3.0.0"},
+  "frame_number": {"val": 0, "version": "3.0.0"},
+  "type_id": {"val": 0, "version": "3.0.0"},
+  "state": {"val": 0, "version": "3.0.0"},
+  "facing_direction": {"val": 0.0, "version": "3.0.0"},
+  "x_velocity": {"val": 0.0, "version": "3.0.0"},
+  "y_velocity": {"val": 0.0, "version": "3.0.0"},
+  "x_position": {"val": 0.0, "version": "3.0.0"},
+  "y_position": {"val": 0.0, "version": "3.0.0"},
+  "damage_taken": {"val": 0, "version": "3.0.0"},
+  "expiration_timer": {"val": 0.0, "version": "3.0.0"},
+  "spawn_id": {"val": 0, "version": "3.0.0"},
+  "misc_1": {"val": 0, "version": "3.2.0"},
+  "misc_2": {"val": 0, "version": "3.2.0"},
+  "misc_3": {"val": 0, "version": "3.2.0"},
+  "misc_4": {"val": 0, "version": "3.2.0"},
+  "owner": {"val": 0, "version": "3.6.0"}
+}

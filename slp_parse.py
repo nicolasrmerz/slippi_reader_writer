@@ -9,11 +9,13 @@ from dacite import from_dict
 
 from slp_dataclasses import (
     EventPayloads,
+    FrameBookend,
     FrameList,
     FrameStart,
-    FrameBookend,
     GameEnd,
     GameStart,
+    ItemList,
+    ItemUpdate,
     MessageSplitter,
     PostFrameUpdate,
     PreFrameUpdate,
@@ -28,6 +30,7 @@ class SlpBin:
         self.payload_size_dict: dict = dict()
         self.version: str = ""
         self.pre_frames: FrameList = FrameList()
+        self.item_updates: ItemList = ItemList()
         self.post_frames: FrameList = FrameList()
         self.frame_starts: list = list()
         self.frame_bookends: list = list()
@@ -39,6 +42,9 @@ class SlpBin:
         self.gecko_cmd_byte = None
         self.pre_frame_update_template: PreFrameUpdate = self.init_dataclass(
             config_dir, "pre_frame_defaults.json", PreFrameUpdate
+        )
+        self.item_update_template: ItemUpdate = self.init_dataclass(
+            config_dir, "item_update_defaults.json", ItemUpdate
         )
         self.post_frame_update_template: PostFrameUpdate = self.init_dataclass(
             config_dir, "post_frame_defaults.json", PostFrameUpdate
@@ -63,6 +69,7 @@ class SlpBin:
             0x3D: self.parse_gecko_code,
             0x39: self.parse_game_end,
             0x3A: self.parse_frame_start,
+            0x3B: self.parse_item_update,
             0x3C: self.parse_frame_bookend,
         }
 
@@ -110,7 +117,7 @@ class SlpBin:
             new_stream_loc = stream.tell()
             assert (
                 new_stream_loc - total_read - 1 == self.payload_size_dict[cmd_byte]
-            ), "Read payload size differs from payload size defined in EventPayloads"
+            ), f"Read payload size differs from payload size defined in EventPayloads. Read = {new_stream_loc - total_read - 1}, Payload = {self.payload_size_dict[cmd_byte]}"
             total_read = new_stream_loc
 
         assert (
@@ -152,12 +159,11 @@ class SlpBin:
         self.gecko_code = stream.read(self.payload_size_dict[cmd_byte])
 
     def write_gecko_code(self, stream):
-        if self.gecko_code:
+        if self.gecko_code and self.gecko_cmd_byte:
             stream.write(struct.pack(">B", self.gecko_cmd_byte))
             stream.write(self.gecko_code)
         elif len(self.gecko):
             self.gecko.write_message_splitter_list(stream, self.version)
-
 
     def parse_pre_frame_update(self, cmd_byte, stream):
         pfu = copy.deepcopy(self.pre_frame_update_template)
@@ -179,6 +185,13 @@ class SlpBin:
 
         fs.read(stream, self.version, ignore_fields=["command_byte"])
         self.frame_starts.append(fs)
+
+    def parse_item_update(self, cmd_byte, stream):
+        iu = copy.deepcopy(self.item_update_template)
+        iu.command_byte.val = cmd_byte
+
+        iu.read(stream, self.version, ignore_fields=["command_byte"])
+        self.item_updates.add_item(iu)
 
     def parse_frame_bookend(self, cmd_byte, stream):
         fb = copy.deepcopy(self.frame_bookend_template)
@@ -203,15 +216,26 @@ class SlpBin:
         self.game_start.write(stream, self.version)
         self.write_gecko_code(stream)
 
-        for start, pres, posts, bookend in zip(self.frame_starts, self.pre_frames, self.post_frames, self.frame_bookends):
-            start.write(stream, self.version)
+        for start, pres, item_update, posts, bookend in zip_longest(
+            self.frame_starts,
+            self.pre_frames,
+            self.item_updates,
+            self.post_frames,
+            self.frame_bookends,
+        ):
+            if start:
+                start.write(stream, self.version)
             for pre in pres:
                 if pre:
                     pre.write(stream, self.version)
+            if item_update:
+                for item in item_update:
+                    item.write(stream, self.version)
             for post in posts:
                 if post:
                     post.write(stream, self.version)
-            bookend.write(stream, self.version)
+            if bookend:
+                bookend.write(stream, self.version)
 
         self.game_end.write(stream, self.version)
 

@@ -29,6 +29,9 @@ class FrameList:
         else:
             sub_list[frame_num] = f
 
+    def __len__(self):
+        return max([len(x) for x in self.flist])
+
     # Iterate over frame numbers
     def __iter__(self):
         # for (f0, f1, f2, f3) in zip_longest(self.flist):
