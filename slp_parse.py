@@ -1,7 +1,9 @@
 import copy
+import hashlib
 import json
 import os
 import struct
+from dataclasses import dataclass, fields
 from itertools import zip_longest
 from typing import Optional, Union
 
@@ -10,7 +12,6 @@ from dacite import from_dict
 from slp_dataclasses import (
     EventPayloads,
     FrameBookend,
-    FrameList,
     FrameStart,
     GameEnd,
     GameStart,
@@ -19,6 +20,8 @@ from slp_dataclasses import (
     MessageSplitter,
     PostFrameUpdate,
     PreFrameUpdate,
+    PrePostFrameList,
+    StartBookendFrameList,
 )
 from slp_dataclasses.eventpayloads import generate_payload_size_dict
 from slp_dataclasses.gecko import GeckoCode
@@ -29,11 +32,11 @@ class SlpBin:
         self.event_payloads: Optional[EventPayloads] = None
         self.payload_size_dict: dict = dict()
         self.version: str = ""
-        self.pre_frames: FrameList = FrameList()
+        self.pre_frames: PrePostFrameList = PrePostFrameList()
         self.item_updates: ItemList = ItemList()
-        self.post_frames: FrameList = FrameList()
-        self.frame_starts: list = list()
-        self.frame_bookends: list = list()
+        self.post_frames: PrePostFrameList = PrePostFrameList()
+        self.frame_starts: StartBookendFrameList = StartBookendFrameList()
+        self.frame_bookends: StartBookendFrameList = StartBookendFrameList()
         self.game_start: GameStart = self.init_dataclass(
             config_dir, "game_start_defaults.json", GameStart
         )
@@ -74,6 +77,13 @@ class SlpBin:
         }
 
         self.metadata: Optional[bytes] = None
+        self.pre_global_frame_number = (
+            self.post_global_frame_number
+        ) = (
+            self.start_global_frame_number
+        ) = self.item_global_frame_number = self.bookend_global_frame_number = -123
+
+        self.original_ordered_payloads = list()
 
     def init_dataclass(self, config_dir, filename, class_type):
         with open(os.path.join(config_dir, filename), "r") as f:
@@ -129,6 +139,7 @@ class SlpBin:
 
     def parse_gecko_split(self, cmd_byte, stream):
         self.gecko.add_message(cmd_byte, stream, self.version)
+        self.original_ordered_payloads.append(self.gecko.message_splitter_list[-1])
 
     @staticmethod
     def parse_version(stream):
@@ -149,14 +160,20 @@ class SlpBin:
             stream, self.version, ignore_fields=["command_byte", "version"]
         )
 
+        self.original_ordered_payloads.append(self.game_start)
+
     def parse_game_end(self, cmd_byte, stream):
         self.game_end.command_byte.val = cmd_byte
 
         self.game_end.read(stream, self.version, ignore_fields=["command_byte"])
 
+        self.original_ordered_payloads.append(self.game_end)
+
     def parse_gecko_code(self, cmd_byte, stream):
         self.gecko_cmd_byte = cmd_byte
         self.gecko_code = stream.read(self.payload_size_dict[cmd_byte])
+
+        self.original_ordered_payloads.append(self.gecko_code)
 
     def write_gecko_code(self, stream):
         if self.gecko_code and self.gecko_cmd_byte:
@@ -170,35 +187,70 @@ class SlpBin:
         pfu.command_byte.val = cmd_byte
 
         pfu.read(stream, self.version, ignore_fields=["command_byte"])
+        if pfu.frame_number.val < self.pre_global_frame_number:
+            print(
+                f"Pre rollback from {self.pre_global_frame_number} to {pfu.frame_number.val}"
+            )
+        self.pre_global_frame_number = pfu.frame_number.val
         self.pre_frames.add_frame(pfu)
+
+        self.original_ordered_payloads.append(pfu)
 
     def parse_post_frame_update(self, cmd_byte, stream):
         pfu = copy.deepcopy(self.post_frame_update_template)
         pfu.command_byte.val = cmd_byte
 
         pfu.read(stream, self.version, ignore_fields=["command_byte"])
+        if pfu.frame_number.val < self.post_global_frame_number:
+            print(
+                f"Post rollback from {self.post_global_frame_number} to {pfu.frame_number.val}"
+            )
+        self.post_global_frame_number = pfu.frame_number.val
         self.post_frames.add_frame(pfu)
+
+        self.original_ordered_payloads.append(pfu)
 
     def parse_frame_start(self, cmd_byte, stream):
         fs = copy.deepcopy(self.frame_start_template)
         fs.command_byte.val = cmd_byte
 
         fs.read(stream, self.version, ignore_fields=["command_byte"])
-        self.frame_starts.append(fs)
+        if fs.frame_number.val < self.start_global_frame_number:
+            print(
+                f"Start rollback from {self.start_global_frame_number} to {fs.frame_number.val}"
+            )
+        self.start_global_frame_number = fs.frame_number.val
+        self.frame_starts.add_frame(fs)
+
+        self.original_ordered_payloads.append(fs)
 
     def parse_item_update(self, cmd_byte, stream):
         iu = copy.deepcopy(self.item_update_template)
         iu.command_byte.val = cmd_byte
 
         iu.read(stream, self.version, ignore_fields=["command_byte"])
+        if iu.frame_number.val < self.item_global_frame_number:
+            print(
+                f"Item rollback from {self.item_global_frame_number} to {iu.frame_number.val}"
+            )
+        self.item_global_frame_number = iu.frame_number.val
         self.item_updates.add_item(iu)
+
+        self.original_ordered_payloads.append(iu)
 
     def parse_frame_bookend(self, cmd_byte, stream):
         fb = copy.deepcopy(self.frame_bookend_template)
         fb.command_byte.val = cmd_byte
 
         fb.read(stream, self.version, ignore_fields=["command_byte"])
-        self.frame_bookends.append(fb)
+        if fb.frame_number.val < self.bookend_global_frame_number:
+            print(
+                f"Bookend rollback from {self.bookend_global_frame_number} to {fb.frame_number.val}"
+            )
+        self.bookend_global_frame_number = fb.frame_number.val
+        self.frame_bookends.add_frame(fb)
+
+        self.original_ordered_payloads.append(fb)
 
     def write_ubjson_header(self, stream, size):
         stream.write(
@@ -225,15 +277,17 @@ class SlpBin:
         ):
             if start:
                 start.write(stream, self.version)
-            for pre in pres:
-                if pre:
-                    pre.write(stream, self.version)
+            if pres:
+                for pre in pres:
+                    if pre:
+                        pre.write(stream, self.version)
             if item_update:
                 for item in item_update:
                     item.write(stream, self.version)
-            for post in posts:
-                if post:
-                    post.write(stream, self.version)
+            if posts:
+                for post in posts:
+                    if post:
+                        post.write(stream, self.version)
             if bookend:
                 bookend.write(stream, self.version)
 
@@ -246,11 +300,37 @@ class SlpBin:
         stream.seek(location_0)
         self.write_ubjson_header(stream, total_written)
 
+    def dump_original_ordered_payload_names(self, file_path):
+        with open(file_path, "w") as f:
+            for p in self.original_ordered_payloads:
+                s = type(p).__name__
+                if hasattr(p, "frame_number"):
+                    # f.write(type(p).__name__ + ", " + str(p.frame_number.val) + "\n")
+                    s = s + ", " + str(p.frame_number.val)
+                s = s + ", " + str(hash_obj(p))
+                f.write(s + "\n")
+
+
+def hash_obj(obj):
+    s = "".join(
+        [
+            str(getattr(obj, field.name).val)
+            for field in fields(obj)
+            if hasattr(getattr(obj, field.name), "val")
+        ]
+    )
+    m = hashlib.sha256()
+    m.update(s.encode())
+
+    return str(m.hexdigest())[:8]
+    # for f in obj.fields:
+
 
 if __name__ == "__main__":
     slp_bin = SlpBin("configs")
 
-    with open("samples/offline_2.slp", "rb") as f:
+    with open("samples/netplay.slp", "rb") as f:
+        # with open("samples/offline_2.slp", "rb") as f:
         slp_bin.read(f)
 
     with open("samples/test_out.slp", "wb") as f:
