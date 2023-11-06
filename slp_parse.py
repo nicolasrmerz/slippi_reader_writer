@@ -6,6 +6,7 @@ import struct
 from dataclasses import dataclass, fields
 from itertools import zip_longest
 from typing import Optional, Union
+import numpy as np
 
 from dacite import from_dict
 
@@ -29,6 +30,7 @@ from slp_dataclasses.gecko import GeckoCode
 
 class SlpBin:
     def __init__(self, config_dir):
+
         self.event_payloads: Optional[EventPayloads] = None
         self.payload_size_dict: dict = dict()
         self.version: str = ""
@@ -84,7 +86,6 @@ class SlpBin:
         ) = self.item_global_frame_number = self.bookend_global_frame_number = -123
 
         self.original_ordered_payloads = list()
-
     def init_dataclass(self, config_dir, filename, class_type):
         with open(os.path.join(config_dir, filename), "r") as f:
             data = json.load(f)
@@ -300,6 +301,35 @@ class SlpBin:
         stream.seek(location_0)
         self.write_ubjson_header(stream, total_written)
 
+    def to_numpy(self, file_path):
+        d = list()
+        for _, pres, _, posts, _ in zip_longest(
+            self.frame_starts,
+            self.pre_frames,
+            self.item_updates,
+            self.post_frames,
+            self.frame_bookends,
+        ):
+            pres_np = []
+            posts_np = []
+            if pres:
+                for pre in pres:
+                    if pre:
+                        pres_np.append(pre.to_numpy())
+            if posts:
+                for post in posts:
+                    if post:
+                        posts_np.append(post.to_numpy())
+
+            frame_data = []
+            for pre_zip, post_zip in zip(pres_np, posts_np):
+                frame_data.append(np.concatenate([pre_zip, post_zip]))
+            frame_data = np.concatenate(frame_data)
+            d.append(frame_data)
+
+        return np.array(d)
+
+
     def dump_original_ordered_payload_names(self, file_path):
         with open(file_path, "w") as f:
             for p in self.original_ordered_payloads:
@@ -333,5 +363,7 @@ if __name__ == "__main__":
         # with open("samples/offline_2.slp", "rb") as f:
         slp_bin.read(f)
 
-    with open("samples/test_out.slp", "wb") as f:
-        slp_bin.write(f)
+    np_data = slp_bin.to_numpy(None)
+
+    # with open("samples/test_out.slp", "wb") as f:
+    #     slp_bin.write(f)

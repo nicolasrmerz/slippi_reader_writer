@@ -1,14 +1,6 @@
 from dataclasses import dataclass
 
-from .common import (
-    BinData,
-    F32Data,
-    S32Data,
-    U8BitFlagData,
-    U8Data,
-    U16Data,
-    U32Data,
-)
+from .common import BinData, F32Data, S32Data, U8BitFlagData, U8Data, U16Data, U32Data
 
 
 @dataclass
@@ -47,3 +39,9 @@ class PostFrameUpdate(BinData):
     self_induced_ground_x_speed: F32Data
     hitlag_frames_remaining: F32Data
     animation_index: U32Data
+
+    def to_numpy(self):
+        import numpy as np
+
+        d = [self.action_state_frame_counter.val, self.hitlag_frames_remaining.val]
+        return np.array(d).astype(np.float32)

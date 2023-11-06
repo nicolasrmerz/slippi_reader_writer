@@ -35,3 +35,20 @@ class PreFrameUpdate(BinData):
     physical_r_trigger: F32Data
     x_analog_for_ucf: S8Data
     percent: F32Data
+
+    def to_numpy(self):
+        import numpy as np
+
+        d = [
+            self.action_state_id.val,
+            self.x_position.val,
+            self.y_position.val,
+            self.facing_direction.val,
+            self.joystick_x.val,
+            self.joystick_y.val,
+            self.cstick_x.val,
+            self.cstick_y.val,
+            self.trigger.val,
+            self.percent.val,
+        ]
+        return np.array(d).astype(np.float32)
